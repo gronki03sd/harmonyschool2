@@ -1,0 +1,62 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Supprimer catégorie - HarmonySchool2{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Supprimer la catégorie</h1>
+        <a href="{% url 'liste_categories' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">Confirmation de suppression</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Attention: Cette action est irréversible.
+                    </div>
+
+                    <p class="mb-4">
+                        Êtes-vous sûr de vouloir supprimer la catégorie suivante ?
+                    </p>
+
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ categorie.nom }}</h5>
+                            <p class="card-text">
+                                <strong>Description:</strong> {{ categorie.description|default:"Non spécifiée" }}<br>
+                                <strong>Nombre d'incidents associés:</strong> {{ categorie.incident_set.count }}
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if categorie.incident_set.count > 0 %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i> Attention: Cette catégorie est associée à {{
+                        categorie.incident_set.count }} incident(s).
+                        La suppression de cette catégorie entraînera la suppression de tous les incidents associés.
+                    </div>
+                    {% endif %}
+
+                    <form method="post" class="text-center">
+                        {% csrf_token %}
+                        <a href="{% url 'liste_categories' %}" class="btn btn-secondary px-4">
+                            Annuler
+                        </a>
+                        <button type="submit" class="btn btn-danger px-4 ms-2">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

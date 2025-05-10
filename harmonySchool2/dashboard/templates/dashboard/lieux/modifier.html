@@ -1,0 +1,93 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Modifier lieu - HarmonySchool2{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Modifier le lieu</h1>
+        <div>
+            <a href="{% url 'liste_lieux' %}" class="btn btn-secondary me-2">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+            <a href="{% url 'supprimer_lieu' lieu.id %}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Supprimer
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Informations du lieu</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.nom.id_for_label }}" class="form-label">Nom *</label>
+                            {{ form.nom }}
+                            {% if form.nom.errors %}
+                            <div class="text-danger mt-1">
+                                {{ form.nom.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.batiment.id_for_label }}" class="form-label">Bâtiment</label>
+                            {{ form.batiment }}
+                            {% if form.batiment.errors %}
+                            <div class="text-danger mt-1">
+                                {{ form.batiment.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.etage.id_for_label }}" class="form-label">Étage</label>
+                                {{ form.etage }}
+                                {% if form.etage.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.etage.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="{{ form.salle.id_for_label }}" class="form-label">Salle</label>
+                                {{ form.salle }}
+                                {% if form.salle.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.salle.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if lieu.incident_set.count > 0 %}
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle"></i> Ce lieu est utilisé par {{ lieu.incident_set.count }}
+                            incident(s).
+                        </div>
+                        {% endif %}
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save"></i> Enregistrer
+                            </button>
+                            <a href="{% url 'liste_lieux' %}" class="btn btn-secondary px-4 ms-2">
+                                Annuler
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HarmonySchool2{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #6f42c1;
+            --success-color: #1cc88a;
+            --info-color: #36b9cc;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --light-color: #f8f9fc;
+            --dark-color: #5a5c69;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f8f9fc;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+            background: linear-gradient(180deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            overflow-x: hidden;
+            transition: all 0.3s;
+        }
+
+        .sidebar .navbar-brand {
+            padding: 1.5rem 1rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.05rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1rem;
+        }
+
+        .sidebar hr {
+            margin: 0 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .sidebar .nav-item {
+            position: relative;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar .nav-link {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 1rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid white;
+        }
+
+        .sidebar .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 250px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        /* Topbar */
+        .topbar {
+            background-color: white;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            padding: 0.75rem 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            background-color: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+            padding: 0.75rem 1.25rem;
+        }
+
+        .border-left-primary {
+            border-left: 0.25rem solid var(--primary-color) !important;
+        }
+
+        .border-left-success {
+            border-left: 0.25rem solid var(--success-color) !important;
+        }
+
+        .border-left-info {
+            border-left: 0.25rem solid var(--info-color) !important;
+        }
+
+        .border-left-warning {
+            border-left: 0.25rem solid var(--warning-color) !important;
+        }
+
+        .border-left-danger {
+            border-left: 0.25rem solid var(--danger-color) !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-left: -250px;
+            }
+
+            .sidebar.toggled {
+                margin-left: 0;
+            }
+
+            .content {
+                margin-left: 0;
+            }
+
+            .content.toggled {
+                margin-left: 250px;
+            }
+        }
+    </style>
+
+{% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Sidebar -->
+    {% if user.is_authenticated %}
+    <nav class="sidebar" id="sidebar">
+        <a class="navbar-brand" href="{% url 'dashboard_home' %}">
+            <i class="fas fa-shield-alt"></i> HARMONYGUARD
+        </a>
+
+        <div class="nav flex-column">
+            <!-- Admin sees everything -->
+            {% if user.role.nom == 'Admin' %}
+            <!-- Dashboard -->
+            <div class="nav-item">
+                <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}"
+                    href="{% url 'dashboard_home' %}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Tableau de bord</span>
+                </a>
+            </div>
+
+            <!-- Mon Profil -->
+            <div class="nav-item">
+                <a class="nav-link {% if '/profile/' in request.path %}active{% endif %}"
+                    href="{% url 'dashboard_home' %}">
+                    <i class="fas fa-user"></i>
+                    <span>Mon Profil</span>
+                </a>
+            </div>
+
+            <!-- Incidents -->
+            <div class="nav-item">
+                <a class="nav-link {% if '/incidents/' in request.path %}active{% endif %}"
+                    href="{% url 'liste_incidents' %}">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Incidents</span>
+                </a>
+            </div>
+
+            <!-- Categories -->
+            <div class="nav-item">
+                <a class="nav-link {% if '/categories/' in request.path %}active{% endif %}"
+                    href="{% url 'liste_categories' %}">
+                    <i class="fas fa-folder"></i>
+                    <span>Catégories</span>
+                </a>
+            </div>
+
+            <!-- Locations -->
+            <div class="nav-item">
+                <a class="nav-link {% if '/lieux/' in request.path %}active{% endif %}" href="{% url 'liste_lieux' %}">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Lieux</span>
+                </a>
+            </div>
+
+            <hr>
+
+            <!-- Users -->
+            <div class="nav-item">
+                <a class="nav-link {% if '/utilisateurs/' in request.path %}active{% endif %}"
+                    href="{% url 'liste_utilisateurs' %}">
+                    <i class="fas fa-users"></i>
+                    <span>Utilisateurs</span>
+                </a>
+            </div>
+
+            <!-- Roles -->
+            <div class="nav-item">
+                <a class="nav-link {% if '/roles/' in request.path %}active{% endif %}" href="{% url 'liste_roles' %}">
+                    <i class="fas fa-user-tag"></i>
+                    <span>Rôles</span>
+                </a>
+            </div>
+            {% else %}
+            <!-- Non-admin users see based on permissions -->
+            <!-- Profile for everyone -->
+            <div class="nav-item">
+                <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}"
+                    href="{% url 'dashboard_home' %}">
+                    <i class="fas fa-user"></i>
+                    <span>Mon Profil</span>
+                </a>
+            </div>
+
+            <!-- Incidents - everyone can see their incidents -->
+            <div class="nav-item">
+                <a class="nav-link {% if '/incidents/' in request.path %}active{% endif %}"
+                    href="{% url 'liste_incidents' %}">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Incidents</span>
+                </a>
+            </div>
+
+            <!-- Show categories if they have permission -->
+            {% if 'view_categorie' in user.role.permissions_list %}
+            <div class="nav-item">
+                <a class="nav-link {% if '/categories/' in request.path %}active{% endif %}"
+                    href="{% url 'liste_categories' %}">
+                    <i class="fas fa-folder"></i>
+                    <span>Catégories</span>
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Show locations if they have permission -->
+            {% if 'view_lieu' in user.role.permissions_list %}
+            <div class="nav-item">
+                <a class="nav-link {% if '/lieux/' in request.path %}active{% endif %}" href="{% url 'liste_lieux' %}">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Lieux</span>
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Show users section if they have permission -->
+            {% if 'view_utilisateur' in user.role.permissions_list %}
+            <hr>
+            <div class="nav-item">
+                <a class="nav-link {% if '/utilisateurs/' in request.path %}active{% endif %}"
+                    href="{% url 'liste_utilisateurs' %}">
+                    <i class="fas fa-users"></i>
+                    <span>Utilisateurs</span>
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Show roles section if they have permission -->
+            {% if 'view_role' in user.role.permissions_list %}
+            <div class="nav-item">
+                <a class="nav-link {% if '/roles/' in request.path %}active{% endif %}" href="{% url 'liste_roles' %}">
+                    <i class="fas fa-user-tag"></i>
+                    <span>Rôles</span>
+                </a>
+            </div>
+            {% endif %}
+            {% endif %}
+
+            <hr>
+
+            <!-- Logout - Always visible -->
+            <div class="nav-item">
+                <a class="nav-link" href="{% url 'custom_logout' %}">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Déconnexion</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <!-- Content -->
+    <div class="content" id="content">
+        {% if user.is_authenticated %}
+        <div class="topbar">
+            <button id="sidebarToggle" class="btn btn-link d-md-none">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center">
+                    <div class="user-avatar">
+                        {{ user.prenom|first }}{{ user.nom|first }}
+                    </div>
+                    <div class="ms-2">
+                        <div>{{ user.prenom }} {{ user.nom }}</div>
+                        <div class="small text-muted">{{ user.role.nom }}</div>
+                    </div>
+                </div>
+                <a href="{% url 'custom_logout' %}" class="btn btn-light btn-sm ms-3">
+                    <i class="fas fa-sign-out-alt me-1"></i>Déconnexion
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Messages -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Main Content -->
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Bootstrap JS with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        // Sidebar Toggle
+        document.getElementById('sidebarToggle')?.addEventListener('click', function () {
+            document.getElementById('sidebar').classList.toggle('toggled');
+            document.getElementById('content').classList.toggle('toggled');
+
+            // Toggle overlay on mobile
+            const overlay = document.getElementById('sidebarOverlay');
+            if (overlay) {
+                if (document.getElementById('sidebar').classList.contains('toggled')) {
+                    overlay.classList.add('show');
+                } else {
+                    overlay.classList.remove('show');
+                }
+            }
+        });
+
+        // Auto-hide alerts after 5 seconds
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function (alert) {
+            setTimeout(function () {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }, 5000);
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

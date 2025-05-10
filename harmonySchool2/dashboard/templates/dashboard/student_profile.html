@@ -1,0 +1,220 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Mon Profil - HarmonySchool2{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="h3 mb-4 text-gray-800">Mon Profil</h1>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <!-- Total Incidents -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                MES INCIDENTS
+                            </div>
+                            <div class="h3 mb-0 font-weight-bold text-gray-800">{{ total_incidents }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Incidents -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                NOUVEAUX
+                            </div>
+                            <div class="h3 mb-0 font-weight-bold text-gray-800">{{ incidents_nouveaux }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- In Progress Incidents -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                EN COURS
+                            </div>
+                            <div class="h3 mb-0 font-weight-bold text-gray-800">{{ incidents_en_cours }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-spinner fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resolved Incidents -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                RÉSOLUS
+                            </div>
+                            <div class="h3 mb-0 font-weight-bold text-gray-800">{{ incidents_resolus }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Information -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Informations personnelles</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="font-weight-bold">Prénom:</h6>
+                            <p>{{ user.prenom }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="font-weight-bold">Nom:</h6>
+                            <p>{{ user.nom }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="font-weight-bold">Email:</h6>
+                            <p>{{ user.email }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="font-weight-bold">Téléphone:</h6>
+                            <p>{{ user.telephone|default:"Non renseigné" }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="font-weight-bold">Rôle:</h6>
+                            <p>{{ user.role.nom }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center py-4">
+                        <a href="{% url 'creer_incident' %}" class="btn btn-primary mb-3 w-75">
+                            <i class="fas fa-plus-circle me-2"></i> Signaler un incident
+                        </a>
+                        <a href="{% url 'liste_incidents' %}" class="btn btn-info mb-3 w-75">
+                            <i class="fas fa-list me-2"></i> Voir mes incidents
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Incidents -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Mes incidents récents</h6>
+                    <a href="{% url 'liste_incidents' %}" class="btn btn-sm btn-primary">
+                        Voir tous
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Titre</th>
+                                    <th>Catégorie</th>
+                                    <th>Statut</th>
+                                    <th>Priorité</th>
+                                    <th>Date de création</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for incident in user_incidents %}
+                                <tr>
+                                    <td>{{ incident.titre }}</td>
+                                    <td>{{ incident.categorie.nom }}</td>
+                                    <td>
+                                        {% if incident.statut == 'nouveau' %}
+                                        <span class="badge bg-warning text-dark">Nouveau</span>
+                                        {% elif incident.statut == 'en_cours' %}
+                                        <span class="badge bg-info text-white">En cours</span>
+                                        {% elif incident.statut == 'resolu' %}
+                                        <span class="badge bg-success text-white">Résolu</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary text-white">Fermé</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if incident.priorite == 'faible' %}
+                                        <span class="badge bg-success text-white">Faible</span>
+                                        {% elif incident.priorite == 'moyenne' %}
+                                        <span class="badge bg-info text-white">Moyenne</span>
+                                        {% elif incident.priorite == 'elevee' %}
+                                        <span class="badge bg-warning text-dark">Élevée</span>
+                                        {% else %}
+                                        <span class="badge bg-danger text-white">Critique</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ incident.date_creation|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        <a href="{% url 'detail_incident' incident.id %}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'modifier_incident' incident.id %}"
+                                            class="btn btn-sm btn-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">Aucun incident récent trouvé.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Nouveau rôle - HarmonySchool2{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Nouveau rôle</h1>
+        <a href="{% url 'liste_roles' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Informations du rôle</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.nom.id_for_label }}" class="form-label">Nom *</label>
+                            {{ form.nom }}
+                            {% if form.nom.errors %}
+                            <div class="text-danger mt-1">
+                                {{ form.nom.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.permissions.id_for_label }}" class="form-label">Permissions *</label>
+                            {{ form.permissions }}
+                            {% if form.permissions.errors %}
+                            <div class="text-danger mt-1">
+                                {{ form.permissions.errors }}
+                            </div>
+                            {% endif %}
+                            <small class="text-muted">Entrez les permissions séparées par des virgules. (ex:
+                                create_incident,view_incident,update_incident)</small>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save"></i> Enregistrer
+                            </button>
+                            <a href="{% url 'liste_roles' %}" class="btn btn-secondary px-4 ms-2">
+                                Annuler
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

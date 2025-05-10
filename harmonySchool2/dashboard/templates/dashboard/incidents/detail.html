@@ -1,0 +1,205 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Détail de l'incident - HarmonySchool2{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Incident #{{ incident.id }}</h1>
+        <div>
+            <a href="{% url 'liste_incidents' %}" class="btn btn-secondary me-2">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+            <a href="{% url 'modifier_incident' incident.id %}" class="btn btn-warning me-2">
+                <i class="fas fa-edit"></i> Modifier
+            </a>
+            <a href="{% url 'supprimer_incident' incident.id %}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Supprimer
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Incident Details -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Informations sur l'incident</h6>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title font-weight-bold">{{ incident.titre }}</h5>
+
+                    <div class="row mt-4">
+                        <div class="col-md-3 font-weight-bold">Catégorie:</div>
+                        <div class="col-md-9">{{ incident.categorie.nom }}</div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-3 font-weight-bold">Lieu:</div>
+                        <div class="col-md-9">
+                            {% if incident.lieu %}
+                            {{ incident.lieu.nom }} - {{ incident.lieu.batiment }}
+                            {% if incident.lieu.etage %}(Étage: {{ incident.lieu.etage }}){% endif %}
+                            {% if incident.lieu.salle %}(Salle: {{ incident.lieu.salle }}){% endif %}
+                            {% else %}
+                            Non spécifié
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-3 font-weight-bold">Statut:</div>
+                        <div class="col-md-9">
+                            {% if incident.statut == 'nouveau' %}
+                            <span class="badge bg-warning text-dark">Nouveau</span>
+                            {% elif incident.statut == 'en_cours' %}
+                            <span class="badge bg-info text-white">En cours</span>
+                            {% elif incident.statut == 'resolu' %}
+                            <span class="badge bg-success text-white">Résolu</span>
+                            {% else %}
+                            <span class="badge bg-secondary text-white">Fermé</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-3 font-weight-bold">Priorité:</div>
+                        <div class="col-md-9">
+                            {% if incident.priorite == 'faible' %}
+                            <span class="badge bg-success text-white">Faible</span>
+                            {% elif incident.priorite == 'moyenne' %}
+                            <span class="badge bg-info text-white">Moyenne</span>
+                            {% elif incident.priorite == 'elevee' %}
+                            <span class="badge bg-warning text-dark">Élevée</span>
+                            {% else %}
+                            <span class="badge bg-danger text-white">Critique</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="mt-4">
+                        <h6 class="font-weight-bold">Description:</h6>
+                        <div class="p-3 bg-light rounded">
+                            {{ incident.description|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attachments -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Pièces jointes</h6>
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                        data-bs-target="#addAttachmentModal">
+                        <i class="fas fa-plus"></i> Ajouter
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if pieces_jointes %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Type</th>
+                                    <th>Taille</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for piece in pieces_jointes %}
+                                <tr>
+                                    <td>{{ piece.nom_fichier }}</td>
+                                    <td>{{ piece.type|default:"Non spécifié" }}</td>
+                                    <td>
+                                        {% if piece.taille %}
+                                        {% if piece.taille < 1024 %} {{ piece.taille }} B {% elif piece.taille < 1048576
+                                            %} {{ piece.taille|divisibleby:1024 }} KB {% else %} {{
+                                            piece.taille|divisibleby:1048576 }} MB {% endif %} {% else %} Non spécifié
+                                            {% endif %} </td>
+                                    <td>
+                                        <a href="{{ piece.chemin.url }}" class="btn btn-sm btn-info" target="_blank">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        <a href="{% url 'supprimer_piece_jointe' piece.id %}"
+                                            class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center">Aucune pièce jointe trouvée.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Metadata -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Métadonnées</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-5 font-weight-bold">Créé par:</div>
+                        <div class="col-md-7">{{ incident.createur.prenom }} {{ incident.createur.nom }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-5 font-weight-bold">Créé le:</div>
+                        <div class="col-md-7">{{ incident.date_creation|date:"d/m/Y H:i" }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-5 font-weight-bold">Dernière mise à jour:</div>
+                        <div class="col-md-7">{{ incident.date_modif|date:"d/m/Y H:i" }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-5 font-weight-bold">Assigné à:</div>
+                        <div class="col-md-7">
+                            {% if incident.assigne %}
+                            {{ incident.assigne.prenom }} {{ incident.assigne.nom }}
+                            {% else %}
+                            Non assigné
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Attachment Modal -->
+<div class="modal fade" id="addAttachmentModal" tabindex="-1" aria-labelledby="addAttachmentModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'modifier_incident' incident.id %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addAttachmentModalLabel">Ajouter une pièce jointe</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="pieces_jointes" class="form-label">Fichier</label>
+                        <input type="file" class="form-control" id="pieces_jointes" name="pieces_jointes" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Télécharger</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
