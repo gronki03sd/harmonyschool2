@@ -1,0 +1,352 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Tableau de bord - HarmonySchool2{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="h3 mb-4 text-gray-800">Tableau de bord</h1>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <!-- Total Incidents -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                TOTAL DES INCIDENTS
+                            </div>
+                            <div class="h3 mb-0 font-weight-bold text-gray-800">{{ total_incidents }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Incidents -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                INCIDENTS NOUVEAUX
+                            </div>
+                            <div class="h3 mb-0 font-weight-bold text-gray-800">{{ incidents_nouveaux }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- In Progress Incidents -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                INCIDENTS EN COURS
+                            </div>
+                            <div class="h3 mb-0 font-weight-bold text-gray-800">{{ incidents_en_cours }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-spinner fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resolved Incidents -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                INCIDENTS RÉSOLUS
+                            </div>
+                            <div class="h3 mb-0 font-weight-bold text-gray-800">{{ incidents_resolus }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions Panel -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Actions rapides</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row justify-content-center">
+                        <div class="col-md-4 text-center mb-3">
+                            <a href="{% url 'creer_incident' %}" class="btn btn-primary btn-lg w-75">
+                                <i class="fas fa-plus-circle me-2"></i> Créer un incident
+                            </a>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <a href="{% url 'liste_incidents' %}" class="btn btn-info btn-lg w-75">
+                                <i class="fas fa-list me-2"></i> Voir tous les incidents
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Incidents by Category Chart -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Incidents par catégorie</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height:300px;">
+                        <canvas id="incidentsByCategoryChart"></canvas>
+                        <div id="categoryChartLoader" class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Chargement...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Incidents by Priority Chart -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Incidents par priorité</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height:300px;">
+                        <canvas id="incidentsByPriorityChart"></canvas>
+                        <div id="priorityChartLoader" class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Chargement...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Incidents -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Incidents récents</h6>
+                    <a href="{% url 'liste_incidents' %}" class="btn btn-sm btn-primary">
+                        Voir tous
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Titre</th>
+                                    <th>Catégorie</th>
+                                    <th>Créateur</th>
+                                    <th>Statut</th>
+                                    <th>Priorité</th>
+                                    <th>Date de création</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for incident in incidents_recents %}
+                                <tr>
+                                    <td>{{ incident.titre }}</td>
+                                    <td>{{ incident.categorie.nom }}</td>
+                                    <td>{{ incident.createur.prenom }} {{ incident.createur.nom }}</td>
+                                    <td>
+                                        {% if incident.statut == 'nouveau' %}
+                                        <span class="badge bg-warning text-dark">Nouveau</span>
+                                        {% elif incident.statut == 'en_cours' %}
+                                        <span class="badge bg-info text-white">En cours</span>
+                                        {% elif incident.statut == 'resolu' %}
+                                        <span class="badge bg-success text-white">Résolu</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary text-white">Fermé</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if incident.priorite == 'faible' %}
+                                        <span class="badge bg-success text-white">Faible</span>
+                                        {% elif incident.priorite == 'moyenne' %}
+                                        <span class="badge bg-info text-white">Moyenne</span>
+                                        {% elif incident.priorite == 'elevee' %}
+                                        <span class="badge bg-warning text-dark">Élevée</span>
+                                        {% else %}
+                                        <span class="badge bg-danger text-white">Critique</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ incident.date_creation|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        <a href="{% url 'detail_incident' incident.id %}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'modifier_incident' incident.id %}"
+                                            class="btn btn-sm btn-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center">Aucun incident récent trouvé.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Hide canvases until data is loaded
+        document.getElementById('incidentsByCategoryChart').style.display = 'none';
+        document.getElementById('incidentsByPriorityChart').style.display = 'none';
+
+        // Chart configuration
+        const categoryColors = [
+            'rgba(54, 162, 235, 0.7)',
+            'rgba(255, 99, 132, 0.7)',
+            'rgba(255, 206, 86, 0.7)',
+            'rgba(75, 192, 192, 0.7)',
+            'rgba(153, 102, 255, 0.7)',
+            'rgba(255, 159, 64, 0.7)',
+            'rgba(199, 199, 199, 0.7)'
+        ];
+
+        const priorityColors = {
+            'faible': 'rgba(40, 167, 69, 0.7)',    // green
+            'moyenne': 'rgba(23, 162, 184, 0.7)',  // blue
+            'elevee': 'rgba(255, 193, 7, 0.7)',    // yellow
+            'critique': 'rgba(220, 53, 69, 0.7)'   // red
+        };
+
+        // Fetch chart data from API
+        fetch('{% url "get_chart_data" %}')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erreur réseau: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Hide loaders
+                document.getElementById('categoryChartLoader').style.display = 'none';
+                document.getElementById('priorityChartLoader').style.display = 'none';
+
+                // Show canvases
+                document.getElementById('incidentsByCategoryChart').style.display = 'block';
+                document.getElementById('incidentsByPriorityChart').style.display = 'block';
+
+                // Create Category Chart
+                const categoryCtx = document.getElementById('incidentsByCategoryChart').getContext('2d');
+                const backgroundColors = data.categories.labels.map((_, index) =>
+                    categoryColors[index % categoryColors.length]
+                );
+
+                new Chart(categoryCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.categories.labels,
+                        datasets: [{
+                            data: data.categories.counts,
+                            backgroundColor: backgroundColors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            }
+                        }
+                    }
+                });
+
+                // Create Priority Chart
+                const priorityCtx = document.getElementById('incidentsByPriorityChart').getContext('2d');
+                const priorityBackgroundColors = data.priorities.keys.map(key =>
+                    priorityColors[key] || 'rgba(108, 117, 125, 0.7)'
+                );
+
+                new Chart(priorityCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.priorities.labels,
+                        datasets: [{
+                            label: 'Nombre d\'incidents',
+                            data: data.priorities.counts,
+                            backgroundColor: priorityBackgroundColors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Erreur lors du chargement des données:', error);
+
+                // Hide loaders and show error messages
+                document.getElementById('categoryChartLoader').innerHTML =
+                    '<div class="alert alert-danger">Erreur lors du chargement des données</div>';
+                document.getElementById('priorityChartLoader').innerHTML =
+                    '<div class="alert alert-danger">Erreur lors du chargement des données</div>';
+            });
+    });
+</script>
+{% endblock %}

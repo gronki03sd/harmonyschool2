@@ -1,0 +1,128 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Lieux - HarmonySchool2{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Lieux</h1>
+        <a href="{% url 'creer_lieu' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nouveau lieu
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Liste des lieux</h6>
+        </div>
+        <div class="card-body">
+            <!-- Filter Controls -->
+            <div class="row mb-3">
+                <div class="col-md-3 mb-2">
+                    <input type="text" class="form-control" id="lieuNameSearch" placeholder="Rechercher par nom...">
+                </div>
+                <div class="col-md-3 mb-2">
+                    <select id="lieuBuildingFilter" class="form-select">
+                        <option value="">Filtrer par bâtiment</option>
+                        {% for batiment in batiments %}
+                        <option value="{{ batiment }}">{{ batiment }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <select id="lieuFloorFilter" class="form-select">
+                        <option value="">Filtrer par étage</option>
+                        {% for etage in etages %}
+                        <option value="{{ etage }}">{{ etage }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <input type="text" class="form-control" id="lieuRoomSearch" placeholder="Rechercher par salle...">
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="lieuxTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom</th>
+                            <th>Bâtiment</th>
+                            <th>Étage</th>
+                            <th>Salle</th>
+                            <th>Nombre d'incidents</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lieu in lieux %}
+                        <tr>
+                            <td>{{ lieu.id }}</td>
+                            <td>{{ lieu.nom }}</td>
+                            <td>{{ lieu.batiment|default:"-" }}</td>
+                            <td>{{ lieu.etage|default:"-" }}</td>
+                            <td>{{ lieu.salle|default:"-" }}</td>
+                            <td>{{ lieu.incident_set.count }}</td>
+                            <td>
+                                <a href="{% url 'modifier_lieu' lieu.id %}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'supprimer_lieu' lieu.id %}" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">Aucun lieu trouvé.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const nameInput = document.getElementById('lieuNameSearch');
+  const buildingFilter = document.getElementById('lieuBuildingFilter');
+  const floorFilter = document.getElementById('lieuFloorFilter');
+  const roomInput = document.getElementById('lieuRoomSearch');
+  const table = document.getElementById('lieuxTable');
+  const rows = table.querySelectorAll('tbody tr');
+
+  function filterTable() {
+    const nameValue = nameInput.value.toLowerCase();
+    const buildingValue = buildingFilter.value.toLowerCase();
+    const floorValue = floorFilter.value.toLowerCase();
+    const roomValue = roomInput.value.toLowerCase();
+
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      const nameText = cells[1]?.textContent.toLowerCase() || '';
+      const buildingText = cells[2]?.textContent.toLowerCase() || '';
+      const floorText = cells[3]?.textContent.toLowerCase() || '';
+      const roomText = cells[4]?.textContent.toLowerCase() || '';
+
+      let show = true;
+      if (nameValue && !nameText.includes(nameValue)) show = false;
+      if (buildingValue && !buildingText.includes(buildingValue)) show = false;
+      if (floorValue && !floorText.includes(floorValue)) show = false;
+      if (roomValue && !roomText.includes(roomValue)) show = false;
+
+      row.style.display = show ? '' : 'none';
+    });
+  }
+
+  nameInput.addEventListener('input', filterTable);
+  buildingFilter.addEventListener('change', filterTable);
+  floorFilter.addEventListener('change', filterTable);
+  roomInput.addEventListener('input', filterTable);
+});
+</script>
+{% endblock %}

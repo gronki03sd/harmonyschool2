@@ -1,0 +1,64 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Supprimer lieu - HarmonySchool2{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Supprimer le lieu</h1>
+        <a href="{% url 'liste_lieux' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">Confirmation de suppression</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Attention: Cette action est irréversible.
+                    </div>
+
+                    <p class="mb-4">
+                        Êtes-vous sûr de vouloir supprimer le lieu suivant ?
+                    </p>
+
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ lieu.nom }}</h5>
+                            <p class="card-text">
+                                <strong>Bâtiment:</strong> {{ lieu.batiment|default:"Non spécifié" }}<br>
+                                <strong>Étage:</strong> {{ lieu.etage|default:"Non spécifié" }}<br>
+                                <strong>Salle:</strong> {{ lieu.salle|default:"Non spécifiée" }}<br>
+                                <strong>Nombre d'incidents associés:</strong> {{ lieu.incident_set.count }}
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if lieu.incident_set.count > 0 %}
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle"></i> Ce lieu est utilisé par {{ lieu.incident_set.count }}
+                        incident(s).
+                        Les incidents associés seront mis à jour pour ne plus référencer ce lieu.
+                    </div>
+                    {% endif %}
+
+                    <form method="post" class="text-center">
+                        {% csrf_token %}
+                        <a href="{% url 'liste_lieux' %}" class="btn btn-secondary px-4">
+                            Annuler
+                        </a>
+                        <button type="submit" class="btn btn-danger px-4 ms-2">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

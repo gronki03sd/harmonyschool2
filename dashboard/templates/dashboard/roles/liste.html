@@ -1,0 +1,102 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Rôles - HarmonySchool2{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Rôles</h1>
+        <a href="{% url 'creer_role' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nouveau rôle
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Liste des rôles</h6>
+        </div>
+        <div class="card-body">
+            <!-- Filter Controls -->
+            <div class="row mb-3">
+                <div class="col-md-6 mb-2">
+                    <input type="text" class="form-control" id="roleNameSearch" placeholder="Rechercher par nom...">
+                </div>
+                <div class="col-md-6 mb-2">
+                    <input type="text" class="form-control" id="rolePermissionSearch" placeholder="Rechercher par permission...">
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="rolesTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom</th>
+                            <th>Permissions</th>
+                            <th>Utilisateurs</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for role in roles %}
+                        <tr>
+                            <td>{{ role.id }}</td>
+                            <td>{{ role.nom }}</td>
+                            <td>{{ role.permissions|truncatechars:100 }}</td>
+                            <td>{{ role.utilisateur_set.count }}</td>
+                            <td>
+                                <a href="{% url 'modifier_role' role.id %}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'supprimer_role' role.id %}" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">Aucun rôle trouvé.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        $('#rolesTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+            }
+        });
+    });
+
+document.addEventListener('DOMContentLoaded', function() {
+  const nameInput = document.getElementById('roleNameSearch');
+  const permissionInput = document.getElementById('rolePermissionSearch');
+  const table = document.getElementById('rolesTable');
+  const rows = table.querySelectorAll('tbody tr');
+
+  function filterTable() {
+    const nameValue = nameInput.value.toLowerCase();
+    const permissionValue = permissionInput.value.toLowerCase();
+    rows.forEach(row => {
+      const nameText = row.querySelectorAll('td')[1]?.textContent.toLowerCase() || '';
+      const permissionText = row.querySelectorAll('td')[2]?.textContent.toLowerCase() || '';
+      let show = true;
+      if (nameValue && !nameText.includes(nameValue)) show = false;
+      if (permissionValue && !permissionText.includes(permissionValue)) show = false;
+      row.style.display = show ? '' : 'none';
+    });
+  }
+
+  nameInput.addEventListener('input', filterTable);
+  permissionInput.addEventListener('input', filterTable);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,194 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Incidents - HarmonySchool2{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Incidents</h1>
+        <a href="{% url 'creer_incident' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nouvel incident
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Liste des incidents</h6>
+        </div>
+        <div class="card-body">
+            <!-- Filter Controls -->
+            <div class="row mb-3">
+                <div class="col-md-2 mb-2">
+                    <input type="text" class="form-control" id="incidentTitleSearch" placeholder="Titre...">
+                </div>
+                <div class="col-md-2 mb-2">
+                    <select id="incidentCategoryFilter" class="form-select">
+                        <option value="">Catégorie</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat }}">{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <select id="incidentLieuFilter" class="form-select">
+                        <option value="">Lieu</option>
+                        {% for lieu in lieux %}
+                        <option value="{{ lieu }}">{{ lieu }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <select id="incidentStatusFilter" class="form-select">
+                        <option value="">Statut</option>
+                        <option value="Nouveau">Nouveau</option>
+                        <option value="En cours">En cours</option>
+                        <option value="Résolu">Résolu</option>
+                        <option value="Fermé">Fermé</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <select id="incidentPriorityFilter" class="form-select">
+                        <option value="">Priorité</option>
+                        <option value="Faible">Faible</option>
+                        <option value="Moyenne">Moyenne</option>
+                        <option value="Élevée">Élevée</option>
+                        <option value="Critique">Critique</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <input type="date" class="form-control" id="incidentDateFilter">
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="incidentsTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Titre</th>
+                            <th>Catégorie</th>
+                            <th>Lieu</th>
+                            <th>Créé par</th>
+                            <th>Assigné à</th>
+                            <th>Statut</th>
+                            <th>Priorité</th>
+                            <th>Date de création</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for incident in incidents %}
+                        <tr>
+                            <td>{{ incident.id }}</td>
+                            <td>{{ incident.titre }}</td>
+                            <td>{{ incident.categorie.nom }}</td>
+                            <td>{{ incident.lieu.nom|default:"-" }}</td>
+                            <td>{{ incident.createur.prenom }} {{ incident.createur.nom }}</td>
+                            <td>{{ incident.assigne.prenom|default:"-" }} {{ incident.assigne.nom|default:"" }}</td>
+                            <td>
+                                {% if incident.statut == 'nouveau' %}
+                                <span class="badge bg-warning text-dark">Nouveau</span>
+                                {% elif incident.statut == 'en_cours' %}
+                                <span class="badge bg-info text-white">En cours</span>
+                                {% elif incident.statut == 'resolu' %}
+                                <span class="badge bg-success text-white">Résolu</span>
+                                {% else %}
+                                <span class="badge bg-secondary text-white">Fermé</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if incident.priorite == 'faible' %}
+                                <span class="badge bg-success text-white">Faible</span>
+                                {% elif incident.priorite == 'moyenne' %}
+                                <span class="badge bg-info text-white">Moyenne</span>
+                                {% elif incident.priorite == 'elevee' %}
+                                <span class="badge bg-warning text-dark">Élevée</span>
+                                {% else %}
+                                <span class="badge bg-danger text-white">Critique</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ incident.date_creation|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <a href="{% url 'detail_incident' incident.id %}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'modifier_incident' incident.id %}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'supprimer_incident' incident.id %}" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="10" class="text-center">Aucun incident trouvé.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        $('#incidentsTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+            },
+            "order": [[8, "desc"]] // Sort by date (column 8) in descending order
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const titleInput = document.getElementById('incidentTitleSearch');
+        const categoryFilter = document.getElementById('incidentCategoryFilter');
+        const lieuFilter = document.getElementById('incidentLieuFilter');
+        const statusFilter = document.getElementById('incidentStatusFilter');
+        const priorityFilter = document.getElementById('incidentPriorityFilter');
+        const dateFilter = document.getElementById('incidentDateFilter');
+        const table = document.getElementById('incidentsTable');
+        const rows = table.querySelectorAll('tbody tr');
+
+        function filterTable() {
+            const titleValue = titleInput.value.toLowerCase();
+            const categoryValue = categoryFilter.value.toLowerCase();
+            const lieuValue = lieuFilter.value.toLowerCase();
+            const statusValue = statusFilter.value.toLowerCase();
+            const priorityValue = priorityFilter.value.toLowerCase();
+            const dateValue = dateFilter.value;
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const titleText = cells[1]?.textContent.toLowerCase() || '';
+                const categoryText = cells[2]?.textContent.toLowerCase() || '';
+                const lieuText = cells[3]?.textContent.toLowerCase() || '';
+                const statusText = cells[6]?.textContent.toLowerCase() || '';
+                const priorityText = cells[7]?.textContent.toLowerCase() || '';
+                const dateText = cells[8]?.textContent || '';
+
+                let show = true;
+                if (titleValue && !titleText.includes(titleValue)) show = false;
+                if (categoryValue && !categoryText.includes(categoryValue)) show = false;
+                if (lieuValue && !lieuText.includes(lieuValue)) show = false;
+                if (statusValue && !statusText.includes(statusValue)) show = false;
+                if (priorityValue && !priorityText.includes(priorityValue)) show = false;
+                if (dateValue && !dateText.includes(dateValue)) show = false;
+
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
+        titleInput.addEventListener('input', filterTable);
+        categoryFilter.addEventListener('change', filterTable);
+        lieuFilter.addEventListener('change', filterTable);
+        statusFilter.addEventListener('change', filterTable);
+        priorityFilter.addEventListener('change', filterTable);
+        dateFilter.addEventListener('change', filterTable);
+    });
+</script>
+{% endblock %}

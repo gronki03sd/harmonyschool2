@@ -1,0 +1,137 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Utilisateurs - HarmonySchool2{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Utilisateurs</h1>
+        <a href="{% url 'creer_utilisateur' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nouvel utilisateur
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Liste des utilisateurs</h6>
+        </div>
+        <div class="card-body">
+            <!-- Filter Controls -->
+            <div class="row mb-3">
+                <div class="col-md-3 mb-2">
+                    <input type="text" class="form-control" id="userNameSearch" placeholder="Rechercher par nom...">
+                </div>
+                <div class="col-md-3 mb-2">
+                    <input type="text" class="form-control" id="userEmailSearch" placeholder="Rechercher par email...">
+                </div>
+                <div class="col-md-3 mb-2">
+                    <select id="userRoleFilter" class="form-select">
+                        <option value="">Filtrer par rôle</option>
+                        <option value="admin">admin</option>
+                        <option value="enseignant">enseignant</option>
+                        <option value="Etudiant">Etudiant</option>
+                        <option value="Personnel">Personnel</option>
+                        
+                    </select>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <select id="userStatusFilter" class="form-select">
+                        <option value="">Filtrer par statut</option>
+                        <option value="Actif">Actif</option>
+                        <option value="Inactif">Inactif</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="usersTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom complet</th>
+                            <th>Email</th>
+                            <th>Téléphone</th>
+                            <th>Rôle</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for utilisateur in utilisateurs %}
+                        <tr>
+                            <td>{{ utilisateur.id }}</td>
+                            <td>{{ utilisateur.prenom }} {{ utilisateur.nom }}</td>
+                            <td>{{ utilisateur.email }}</td>
+                            <td>{{ utilisateur.telephone|default:"-" }}</td>
+                            <td>{{ utilisateur.role.nom }}</td>
+                            <td>
+                                {% if utilisateur.actif %}
+                                <span class="badge bg-success text-white">Actif</span>
+                                {% else %}
+                                <span class="badge bg-danger text-white">Inactif</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'modifier_utilisateur' utilisateur.id %}"
+                                    class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'supprimer_utilisateur' utilisateur.id %}"
+                                    class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">Aucun utilisateur trouvé.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const nameInput = document.getElementById('userNameSearch');
+  const emailInput = document.getElementById('userEmailSearch');
+  const roleFilter = document.getElementById('userRoleFilter');
+  const statusFilter = document.getElementById('userStatusFilter');
+  const table = document.getElementById('usersTable');
+  const rows = table.querySelectorAll('tbody tr');
+
+  function filterTable() {
+    const nameValue = nameInput.value.toLowerCase();
+    const emailValue = emailInput.value.toLowerCase();
+    const roleValue = roleFilter.value.toLowerCase();
+    const statusValue = statusFilter.value.toLowerCase();
+
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      const nameText = cells[1]?.textContent.toLowerCase() || '';
+      const emailText = cells[2]?.textContent.toLowerCase() || '';
+      const roleText = cells[4]?.textContent.toLowerCase() || '';
+      const statusText = cells[5]?.textContent.toLowerCase() || '';
+
+      let show = true;
+      if (nameValue && !nameText.includes(nameValue)) show = false;
+      if (emailValue && !emailText.includes(emailValue)) show = false;
+      if (roleValue && !roleText.includes(roleValue)) show = false;
+      if (statusValue && !statusText.includes(statusValue)) show = false;
+
+      row.style.display = show ? '' : 'none';
+    });
+  }
+
+  nameInput.addEventListener('input', filterTable);
+  emailInput.addEventListener('input', filterTable);
+  roleFilter.addEventListener('change', filterTable);
+  statusFilter.addEventListener('change', filterTable);
+});
+</script>
+{% endblock %}

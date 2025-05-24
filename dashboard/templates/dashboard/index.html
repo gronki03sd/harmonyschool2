@@ -1,0 +1,549 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block title %}Tableau de bord - HarmonySchool2{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card .card-body {
+        padding: 1.5rem;
+    }
+
+    .stat-card .icon-container {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover .icon-container {
+        transform: scale(1.1);
+    }
+
+    .stat-card .stat-title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0;
+    }
+
+    .chart-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .chart-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .chart-card .card-header {
+        background-color: transparent;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        padding: 1.25rem;
+    }
+
+    .chart-card .card-header h6 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .table-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .table-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-card .card-header {
+        background-color: transparent;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        padding: 1.25rem;
+    }
+
+    .table-card .table {
+        margin-bottom: 0;
+    }
+
+    .table-card .table th {
+        font-weight: 600;
+        border-top: none;
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    .table-card .table td {
+        vertical-align: middle;
+    }
+
+    .badge {
+        padding: 0.5em 0.75em;
+        font-weight: 600;
+        border-radius: 6px;
+    }
+
+    .btn-action {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn-action i {
+        font-size: 0.875rem;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        padding: 1rem;
+    }
+
+    .spinner-border {
+        width: 2rem;
+        height: 2rem;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-in-up {
+        animation: fadeInUp 0.5s ease forwards;
+    }
+
+    /* Animation delay classes */
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="h3 mb-4 text-gray-800" data-aos="fade-right">Tableau de bord</h1>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <!-- Total Incidents -->
+        <div class="col-xl-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+            <div class="stat-card card border-left-primary shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="stat-title text-primary">
+                                TOTAL DES INCIDENTS
+                            </div>
+                            <div class="stat-value text-gray-800">{{ total_incidents }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon-container bg-primary bg-opacity-10">
+                                <i class="fas fa-clipboard-list fa-2x text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Incidents -->
+        <div class="col-xl-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+            <div class="stat-card card border-left-warning shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="stat-title text-warning">
+                                INCIDENTS NOUVEAUX
+                            </div>
+                            <div class="stat-value text-gray-800">{{ incidents_nouveaux }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon-container bg-warning bg-opacity-10">
+                                <i class="fas fa-exclamation-circle fa-2x text-warning"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- In Progress Incidents -->
+        <div class="col-xl-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="300">
+            <div class="stat-card card border-left-info shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="stat-title text-info">
+                                INCIDENTS EN COURS
+                            </div>
+                            <div class="stat-value text-gray-800">{{ incidents_en_cours }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon-container bg-info bg-opacity-10">
+                                <i class="fas fa-spinner fa-2x text-info"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resolved Incidents -->
+        <div class="col-xl-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="400">
+            <div class="stat-card card border-left-success shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="stat-title text-success">
+                                INCIDENTS RÉSOLUS
+                            </div>
+                            <div class="stat-value text-gray-800">{{ incidents_resolus }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon-container bg-success bg-opacity-10">
+                                <i class="fas fa-check-circle fa-2x text-success"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Top Categories -->
+        <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+            <div class="chart-card card shadow h-100">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Top catégories d'incidents</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for cat, count in top_categories %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ cat }}</span>
+                            <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-muted">Aucune donnée</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Top Priorities -->
+        <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+            <div class="chart-card card shadow h-100">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Top priorités d'incidents</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for pri, count in top_priorities %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ pri|title }}</span>
+                            <span class="badge bg-info rounded-pill">{{ count }}</span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-muted">Aucune donnée</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Incidents -->
+    <div class="row">
+        <div class="col-12" data-aos="fade-up" data-aos-delay="300">
+            <!-- Search and Filter Controls -->
+            <div class="row mb-3">
+                <div class="col-md-4 mb-2">
+                    <input type="text" class="form-control" id="incidentTableSearch" placeholder="Rechercher...">
+                </div>
+                <div class="col-md-4 mb-2">
+                    <select class="form-select" id="incidentStatusFilter">
+                        <option value="">Filtrer par statut</option>
+                        <option value="Nouveau">Nouveau</option>
+                        <option value="En cours">En cours</option>
+                        <option value="Résolu">Résolu</option>
+                        <option value="Fermé">Fermé</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <input type="date" class="form-control" id="incidentDateFilter">
+                </div>
+            </div>
+            <div class="table-card card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Incidents récents</h6>
+                    <a href="{% url 'liste_incidents' %}" class="btn btn-sm btn-primary">
+                        Voir tous
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="incidentTable">
+                            <thead>
+                                <tr>
+                                    <th>Titre</th>
+                                    <th>Catégorie</th>
+                                    <th>Statut</th>
+                                    <th>Priorité</th>
+                                    <th>Date de création</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for incident in incidents_recents %}
+                                <tr class="fade-in-up {% cycle 'delay-1' 'delay-2' 'delay-3' 'delay-4' 'delay-5' %}">
+                                    <td>{{ incident.titre }}</td>
+                                    <td>{{ incident.categorie.nom }}</td>
+                                    <td>
+                                        {% if incident.statut == 'nouveau' %}
+                                        <span class="badge bg-warning text-dark">Nouveau</span>
+                                        {% elif incident.statut == 'en_cours' %}
+                                        <span class="badge bg-info text-white">En cours</span>
+                                        {% elif incident.statut == 'resolu' %}
+                                        <span class="badge bg-success text-white">Résolu</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary text-white">Fermé</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if incident.priorite == 'faible' %}
+                                        <span class="badge bg-success text-white">Faible</span>
+                                        {% elif incident.priorite == 'moyenne' %}
+                                        <span class="badge bg-info text-white">Moyenne</span>
+                                        {% elif incident.priorite == 'elevee' %}
+                                        <span class="badge bg-warning text-dark">Élevée</span>
+                                        {% else %}
+                                        <span class="badge bg-danger text-white">Critique</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ incident.date_creation|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        <a href="{% url 'detail_incident' incident.id %}"
+                                            class="btn btn-sm btn-info btn-action me-1">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'modifier_incident' incident.id %}"
+                                            class="btn btn-sm btn-warning btn-action">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">Aucun incident récent trouvé.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Hide canvases until data is loaded
+        document.getElementById('incidentsByCategoryChart').style.display = 'none';
+        document.getElementById('incidentsByPriorityChart').style.display = 'none';
+
+        // Chart configuration
+        const categoryColors = [
+            'rgba(54, 162, 235, 0.7)',
+            'rgba(255, 99, 132, 0.7)',
+            'rgba(255, 206, 86, 0.7)',
+            'rgba(75, 192, 192, 0.7)',
+            'rgba(153, 102, 255, 0.7)',
+            'rgba(255, 159, 64, 0.7)',
+            'rgba(199, 199, 199, 0.7)'
+        ];
+
+        const priorityColors = {
+            'faible': 'rgba(40, 167, 69, 0.7)',    // green
+            'moyenne': 'rgba(23, 162, 184, 0.7)',  // blue
+            'elevee': 'rgba(255, 193, 7, 0.7)',    // yellow
+            'critique': 'rgba(220, 53, 69, 0.7)'   // red
+        };
+
+        // Fetch chart data from API
+        fetch('{% url "get_chart_data" %}')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erreur réseau: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Hide loaders
+                document.getElementById('categoryChartLoader').style.display = 'none';
+                document.getElementById('priorityChartLoader').style.display = 'none';
+
+                // Show canvases
+                document.getElementById('incidentsByCategoryChart').style.display = 'block';
+                document.getElementById('incidentsByPriorityChart').style.display = 'block';
+
+                // Create Category Chart
+                new Chart(document.getElementById('incidentsByCategoryChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.categories.map(cat => cat.nom),
+                        datasets: [{
+                            data: data.categories.map(cat => cat.count),
+                            backgroundColor: categoryColors,
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    padding: 20,
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            }
+                        },
+                        animation: {
+                            animateScale: true,
+                            animateRotate: true
+                        }
+                    }
+                });
+
+                // Create Priority Chart
+                new Chart(document.getElementById('incidentsByPriorityChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: data.priorities.map(pri => pri.nom),
+                        datasets: [{
+                            data: data.priorities.map(pri => pri.count),
+                            backgroundColor: data.priorities.map(pri => priorityColors[pri.nom.toLowerCase()]),
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    padding: 20,
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            }
+                        },
+                        animation: {
+                            animateScale: true,
+                            animateRotate: true
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                document.getElementById('categoryChartLoader').innerHTML = 'Erreur de chargement';
+                document.getElementById('priorityChartLoader').innerHTML = 'Erreur de chargement';
+            });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('incidentTableSearch');
+        const statusFilter = document.getElementById('incidentStatusFilter');
+        const dateFilter = document.getElementById('incidentDateFilter');
+        const table = document.getElementById('incidentTable');
+        const rows = table.querySelectorAll('tbody tr');
+
+        function filterTable() {
+            const searchValue = searchInput.value.toLowerCase();
+            const statusValue = statusFilter.value.toLowerCase();
+            const dateValue = dateFilter.value;
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const rowText = row.textContent.toLowerCase();
+                const statusText = cells[2]?.textContent.toLowerCase() || '';
+                const dateText = cells[4]?.textContent || '';
+
+                let show = true;
+
+                if (searchValue && !rowText.includes(searchValue)) show = false;
+                if (statusValue && !statusText.includes(statusValue)) show = false;
+                if (dateValue && !dateText.includes(dateValue)) show = false;
+
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
+        searchInput.addEventListener('input', filterTable);
+        statusFilter.addEventListener('change', filterTable);
+        dateFilter.addEventListener('change', filterTable);
+    });
+</script>
+{% endblock %}
